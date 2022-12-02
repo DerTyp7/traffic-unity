@@ -8,8 +8,7 @@ public class TrafficParticipant : MonoBehaviour
     [SerializeField]
     private TrafficNode currentTrafficNode;
 
-    [SerializeField]
-    private float speed = 5f;
+    private float speed = 1f;
 
     private void Start()
     {
@@ -20,6 +19,7 @@ public class TrafficParticipant : MonoBehaviour
     }
     private void Update()
     {
+        speed = currentTrafficNode.GetSpeed();
         if (nextNode != null)
         {
             transform.position = Vector3.MoveTowards(transform.position, nextNode.transform.position, speed * Time.deltaTime); if (transform.position == nextNode.transform.position)
@@ -32,9 +32,6 @@ public class TrafficParticipant : MonoBehaviour
         {
             ChooseNextNode();
         }
-
-
-
     }
 
     private void Arrived()
@@ -46,7 +43,7 @@ public class TrafficParticipant : MonoBehaviour
 
     private void ChooseNextNode()
     {
-        Debug.Log("Choose next node");
+        //Debug.Log("Choose next node");
         if (nextNode == null)
         {
             nextNode = currentTrafficNode.GetNextTrafficNodes()[Random.Range(0, (currentTrafficNode.GetNextTrafficNodes().Count))];

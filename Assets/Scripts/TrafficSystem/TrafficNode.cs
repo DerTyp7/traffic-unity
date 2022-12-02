@@ -4,14 +4,24 @@ using UnityEngine;
 public class TrafficNode : MonoBehaviour
 {
     [SerializeField]
-    private List<TrafficNode> nextTrafficNodes;
+    private List<TrafficNode> nextTrafficNodes = new List<TrafficNode>();
 
+    [SerializeField]
+    private float speed = 5.0f;
+
+    public float GetSpeed() { return speed; }
     public List<TrafficNode> GetNextTrafficNodes() { return nextTrafficNodes; }
 
-    public void AddNextNode(TrafficNode node)
+    public void AddNextNode(TrafficNode newNode)
     {
-        nextTrafficNodes.Add(node);
+        nextTrafficNodes.Add(newNode);
     }
+
+    public void RemoveNextNode(TrafficNode node)
+    {
+        nextTrafficNodes.Remove(node);
+    }
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.green;

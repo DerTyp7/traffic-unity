@@ -6,47 +6,84 @@ public class TrafficParticipant : MonoBehaviour
     private TrafficNode nextNode;
 
     [SerializeField]
-    private TrafficNode currentTrafficNode;
+    private TrafficNode currentNode;
+
+    private bool onNodeNetwork = false;
+
 
     private float speed = 1f;
 
-    private void Start()
-    {
-        if (nextNode == null)
-        {
-            ChooseNextNode();
-        }
-    }
     private void Update()
     {
-        speed = currentTrafficNode.GetSpeed();
-        if (nextNode != null)
+        if (currentNode)
         {
-            transform.position = Vector3.MoveTowards(transform.position, nextNode.transform.position, speed * Time.deltaTime); if (transform.position == nextNode.transform.position)
+            speed = currentNode.GetSpeed();
+
+            if (onNodeNetwork)
             {
-                Arrived();
-                ChooseNextNode();
+                if (nextNode != null)
+                {
+                    transform.position = Vector3.MoveTowards(transform.position, nextNode.transform.position, speed * Time.deltaTime);
+                    if (transform.position == nextNode.transform.position)
+                    {
+                        Arrived();
+                        ChooseNextNode();
+                    }
+                }
+                else
+                {
+                    ChooseNextNode();
+                }
             }
+            else // Align to node network
+            {
+                transform.position = Vector3.MoveTowards(transform.position, currentNode.transform.position, speed * Time.deltaTime);
+                if (transform.position == currentNode.transform.position)
+                {
+                    onNodeNetwork = true;
+                    ChooseNextNode();
+                }
+            }
+
         }
         else
         {
-            ChooseNextNode();
+            currentNode = GetNearestNode();
         }
+
+    }
+
+    private TrafficNode GetNearestNode()
+    {
+        GameObject[] allTrafficNodes = GameObject.FindGameObjectsWithTag("TrafficNode");
+
+        if (allTrafficNodes.Length > 0)
+        {
+            GameObject nearestNodeObject = allTrafficNodes[0];
+
+            foreach (GameObject nodeObject in GameObject.FindGameObjectsWithTag("TrafficNode"))
+            {
+                if ((transform.position - nodeObject.transform.position).sqrMagnitude < (transform.position - nearestNodeObject.transform.position).sqrMagnitude)
+                {
+                    nearestNodeObject = nodeObject;
+                }
+            }
+            return nearestNodeObject.GetComponent<TrafficNode>();
+        }
+        return null;
     }
 
     private void Arrived()
     {
-        Debug.Log("Arrived");
-        currentTrafficNode = nextNode;
+        currentNode = nextNode;
         nextNode = null;
     }
 
     private void ChooseNextNode()
     {
-        //Debug.Log("Choose next node");
         if (nextNode == null)
         {
-            nextNode = currentTrafficNode.GetNextTrafficNodes()[Random.Range(0, (currentTrafficNode.GetNextTrafficNodes().Count))];
+            nextNode = currentNode.GetNextTrafficNodes()[Random.Range(0, (currentNode.GetNextTrafficNodes().Count))];
         }
     }
 
@@ -55,7 +92,6 @@ public class TrafficParticipant : MonoBehaviour
         if (nextNode != null)
         {
             Gizmos.color = Color.red;
-
             Gizmos.DrawLine(transform.position, nextNode.transform.position);
         }
     }

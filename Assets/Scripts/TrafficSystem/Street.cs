@@ -5,7 +5,7 @@ public class Street : MonoBehaviour
 {
     private List<TrafficNode> nodes = new List<TrafficNode>();
 
-    private void Awake()
+    private void Start()
     {
         nodes.Add(Instantiate(PrefabDictionary.instance.nodePrefab, transform).GetComponent<TrafficNode>());
         nodes.Add(Instantiate(PrefabDictionary.instance.nodePrefab, transform).GetComponent<TrafficNode>());
@@ -14,10 +14,10 @@ public class Street : MonoBehaviour
 
         nodes[0].AddNextNode(nodes[1]);
 
-        CreateNode(new Vector3(0, 0, 0));
+        /*CreateNode(new Vector3(0, 0, 0));
         CreateNode(new Vector3(-0.25f, 0, 0));
         RemoveNode(CreateNode(new Vector3(0.33f, 0, 0)));
-        CreateNode(new Vector3(-0.12f, 0, 0));
+        CreateNode(new Vector3(-0.12f, 0, 0));*/
     }
 
     private TrafficNode[] getNearestNodes(float positionX)

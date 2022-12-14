@@ -13,12 +13,10 @@ public class NodePlacer : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.N))
         {
-            Debug.Log("H2213123IT");
             RaycastHit2D hit = Physics2D.Raycast(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
 
             if (hit.collider != null)
             {
-                Debug.Log("HIT");
                 selectedPlacedNode = hit.collider.transform.gameObject.GetComponent<TrafficNode>();
             }
             else

@@ -3,23 +3,40 @@ using UnityEngine;
 
 public class Street : MonoBehaviour
 {
+    [SerializeField]
+    GameObject nodePrefab;
+
     private List<TrafficNode> nodes = new List<TrafficNode>();
 
-    private void Start()
+    public void Place()
     {
-        nodes.Add(Instantiate(PrefabDictionary.instance.nodePrefab, transform).GetComponent<TrafficNode>());
-        nodes.Add(Instantiate(PrefabDictionary.instance.nodePrefab, transform).GetComponent<TrafficNode>());
-        nodes[0].transform.localPosition = new Vector3(-0.5f, 0, 0);
-        nodes[1].transform.localPosition = new Vector3(0.5f, 0, 0);
+        CreateStartEndNodes();
 
-        nodes[0].AddNextNode(nodes[1]);
 
-        /*CreateNode(new Vector3(0, 0, 0));
-        CreateNode(new Vector3(-0.25f, 0, 0));
-        RemoveNode(CreateNode(new Vector3(0.33f, 0, 0)));
-        CreateNode(new Vector3(-0.12f, 0, 0));*/
+        float parentScaleX = Mathf.Abs(transform.parent.transform.localScale.x);
+        float nodeSize = 0.5f;
+
+        int nodeCount = Mathf.RoundToInt(parentScaleX / nodeSize);
+
+        int i = 1; // starts at 1 so the first gets ignored (start node already exists)
+        while (i < nodeCount) // NOT <= so endnode does not get created twice ^
+        {
+            float xPosition = ((i * nodeSize) / parentScaleX) - 0.5f;// weird calc because street is child of object and always has scale of 1f ....
+            CreateNode(new Vector3(xPosition, 0, 0));
+            i++;
+        }
     }
 
+    private void CreateStartEndNodes()
+    {
+        nodes.Add(Instantiate(nodePrefab, transform).GetComponent<TrafficNode>());
+        nodes.Add(Instantiate(nodePrefab, transform).GetComponent<TrafficNode>());
+        nodes[0].transform.localPosition = new Vector3(-0.5f, 0, 0);
+        nodes[1].transform.localPosition = new Vector3(0.5f, 0, 0);
+        nodes[0].SetParentStreet(this);
+        nodes[1].SetParentStreet(this);
+        nodes[0].AddNextNode(nodes[1]);
+    }
     private TrafficNode[] getNearestNodes(float positionX)
     {
         TrafficNode[] nearestNodes = new TrafficNode[2];
@@ -42,15 +59,22 @@ public class Street : MonoBehaviour
         return nearestNodes;
     }
 
+    // Dont create anything behind the endnode or before the startnode
     public TrafficNode CreateNode(Vector3 localPosition)
     {
         TrafficNode[] nearestNodes = getNearestNodes(localPosition.x);
 
-        TrafficNode newNode = Instantiate(PrefabDictionary.instance.nodePrefab, transform).GetComponent<TrafficNode>();
+        TrafficNode newNode = Instantiate(nodePrefab, transform).GetComponent<TrafficNode>();
+        newNode.SetParentStreet(this);
         newNode.transform.localPosition = localPosition;
 
         nearestNodes[0].RemoveNextNode(nearestNodes[1]);
-        nearestNodes[0].AddNextNode(newNode);
+
+        if (nearestNodes[0] != nodes[nodes.Count - 1])
+        {
+            nearestNodes[0].AddNextNode(newNode);
+        }
+
         newNode.AddNextNode(nearestNodes[1]);
         nodes.Insert(nodes.IndexOf(nearestNodes[1]), newNode);
         return newNode;

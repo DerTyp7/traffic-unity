@@ -3,14 +3,15 @@ using UnityEngine;
 public class StreetBuilding : MonoBehaviour
 {
 
-    GameObject currentStreetPO;
+    GameObject currentStreetPSO;
     Vector3 startPosition;
+
 
     private void Update()
     {
         if (Input.GetKeyDown(KeyCode.H))
         {
-            if (currentStreetPO == null)
+            if (currentStreetPSO == null)
             {
                 StartBuilding();
             }
@@ -20,36 +21,41 @@ public class StreetBuilding : MonoBehaviour
             }
         }
 
-        if (currentStreetPO != null && Input.GetKeyDown(KeyCode.J))
+        if (currentStreetPSO != null)
         {
-            if (currentStreetPO.GetComponent<PlaceableObject>().placeable)
+            if (Input.GetKeyDown(KeyCode.J))
             {
-                PlaceBuilding();
+                if (currentStreetPSO.GetComponent<PlaceableStreetObject>().placeable)
+                {
+                    PlaceBuilding();
+                }
             }
-
         }
     }
+
 
     private void StartBuilding()
     {
         startPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         startPosition.z = 0;
 
-        currentStreetPO = Instantiate(PrefabDictionary.instance.oneWayStreetPO, startPosition, Quaternion.identity);
+        currentStreetPSO = Instantiate(PrefabDictionary.instance.oneWayStreetPSO, startPosition, Quaternion.identity);
     }
 
     private void StopBuilding()
     {
-        Destroy(currentStreetPO);
-        currentStreetPO = null;
+        Destroy(currentStreetPSO);
+        currentStreetPSO = null;
         startPosition = Vector3.zero;
     }
 
     private void PlaceBuilding()
     {
-        Transform placedTransform = currentStreetPO.transform;
+        Transform placedTransform = currentStreetPSO.transform;
 
-        Instantiate(PrefabDictionary.instance.oneWayStreet, placedTransform.position, placedTransform.rotation).transform.localScale = placedTransform.localScale;
+        GameObject newStreet = Instantiate(PrefabDictionary.instance.oneWayStreet, placedTransform.position, placedTransform.rotation);
+        newStreet.transform.localScale = placedTransform.localScale;
+        newStreet.GetComponent<StreetContainer>().Place();
 
         StopBuilding();
     }
